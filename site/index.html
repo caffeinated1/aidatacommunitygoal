@@ -2,15 +2,19 @@
 <html lang="en" data-theme="auto">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>A town's first data center — what to require before saying yes</title>
-<meta name="description" content="An interactive requirements guide and open JSON API for communities facing a first data center proposal: what to require, how to verify it, and who pays when it fails.">
+<meta name="description" content="An open requirements guide, readiness assessment, and JSON API for communities facing a first data center proposal: what to require, how to verify it, and who pays when it fails.">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="A town's first data center: what to require before saying yes">
 <meta property="og:description" content="Ten sections, 71 requirements, and an open JSON API so a community can see its goal and check its own readiness before the final vote.">
 <meta property="og:type" content="website">
+<link rel="preload" href="assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/styles.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f6f5c' stroke-width='2.5' stroke-linecap='round'><path d='M4 20V9l8-5 8 5v11'/><path d='M9 20v-7h6v7'/></svg>">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -18,11 +22,8 @@
 <header class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="#top">
-      <span class="brand-mark" aria-hidden="true">▮▮▮</span>
-      <span class="brand-text">
-        <strong>Community Goal</strong>
-        <span>first data center review</span>
-      </span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f6f5c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-7h6v7"></path></svg>
+      <span class="brand-text">Community Goal</span>
     </a>
 
     <nav class="views" aria-label="Views">
@@ -38,11 +39,36 @@
         <span class="score-chip-value" id="score-chip-value">0%</span>
         <span class="score-chip-label" id="score-chip-label">not started</span>
       </div>
-      <button class="icon-btn" id="theme-btn" title="Toggle theme" aria-label="Toggle colour theme">◐</button>
+      <button class="icon-btn" id="theme-btn" title="Toggle theme" aria-label="Toggle colour theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 4v16"></path><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"></path></svg>
+      </button>
     </div>
   </div>
   <div class="topbar-progress" id="topbar-progress"><span id="topbar-progress-bar"></span></div>
 </header>
+
+<nav class="tabbar" aria-label="Views">
+  <button class="view-tab" data-view="guide" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19a2 2 0 0 1 2-2h13"></path><path d="M9 7h6"></path></svg>
+    <span>Guide</span>
+  </button>
+  <button class="view-tab" data-view="readiness">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a8 8 0 1 1 16 0"></path><path d="M12 14l4-5"></path><circle cx="12" cy="14" r="1.5"></circle><path d="M4 18h16"></path></svg>
+    <span>Readiness</span>
+  </button>
+  <button class="view-tab" data-view="evidence">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path><path d="M9 14l2 2 4-4"></path></svg>
+    <span>Evidence</span>
+  </button>
+  <button class="view-tab" data-view="api">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6l-5 6 5 6"></path><path d="M16 6l5 6-5 6"></path><path d="M14 4l-4 16"></path></svg>
+    <span>API</span>
+  </button>
+  <button class="view-tab" data-view="contribute">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8"></path><path d="M8 12h8"></path></svg>
+    <span>Contribute</span>
+  </button>
+</nav>
 
 <main id="main">
   <noscript>
@@ -58,23 +84,37 @@
   <!-- ── Guide ─────────────────────────────────────────────────────── -->
   <section class="view" id="view-guide" hidden>
     <div class="hero" id="top">
-      <p class="eyebrow">A requirements guide for towns, counties, and residents</p>
-      <h1 id="doc-title"></h1>
-      <p class="lede" id="doc-subtitle"></p>
-      <p class="credit" id="credit"></p>
-
-      <div class="goal-card">
-        <h2>The goal</h2>
-        <p class="goal-statement" id="goal-statement"></p>
-        <p class="goal-rule" id="goal-rule"></p>
+      <div class="hero-copy">
+        <span class="eyebrow rise">A requirements guide for towns, counties, and residents</span>
+        <h1 class="hero-title rise" id="doc-title"></h1>
+        <p class="hero-sub rise rise-2" id="doc-sub"></p>
+        <p class="lede rise rise-3" id="doc-subtitle"></p>
+        <p class="credit rise rise-3" id="credit"></p>
       </div>
-
-      <div class="hero-stats" id="hero-stats"></div>
+      <div class="hero-aside">
+        <div class="stat-band rise rise-4" id="hero-stats"></div>
+        <div class="block goal-card rise rise-4">
+          <span class="eyebrow">The goal</span>
+          <p class="block-statement" id="goal-statement"></p>
+          <p class="soft" id="goal-rule"></p>
+        </div>
+      </div>
     </div>
 
     <div class="framing" id="framing"></div>
-    <div class="rule" id="rule"></div>
+    <div class="rule" id="basic-rule"></div>
     <div class="instruments" id="instruments"></div>
+
+    <div class="cta-row">
+      <a class="cta cta-primary" href="#s1-r1" data-cta="assess">
+        <span>Assess a proposal</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+      </a>
+      <a class="cta cta-warn" href="#" id="cta-cite" target="_blank" rel="noopener noreferrer">
+        <span id="cta-cite-label">Claims still need a source — cite one</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
 
     <div class="layout">
       <aside class="sidebar" aria-label="Contents">
@@ -92,19 +132,20 @@
           <div class="filters" id="filters"></div>
           <nav class="toc" id="toc" aria-label="Sections"></nav>
           <div class="sidebar-foot">
-            <button class="btn btn-quiet" id="expand-all">Expand all detail</button>
+            <button class="btn btn-quiet" id="expand-all">Clear filters</button>
           </div>
         </div>
       </aside>
 
       <div class="content">
+        <nav class="section-strip" id="section-strip" aria-label="Sections"></nav>
         <div class="search-results" id="search-results" hidden></div>
         <div class="overlay-banner" id="overlay-banner" hidden></div>
         <div id="sections"></div>
 
         <section class="closing" id="closing">
-          <h2>Before the final vote</h2>
-          <p>The town should be able to tell residents in plain language:</p>
+          <span class="eyebrow">Before the final vote</span>
+          <h2>Can the town answer these six?</h2>
           <ol class="questions" id="questions"></ol>
           <p class="closing-rule" id="closing-rule"></p>
         </section>
@@ -119,20 +160,29 @@
 
   <!-- ── Readiness ─────────────────────────────────────────────────── -->
   <section class="view" id="view-readiness" hidden>
-    <div class="readiness-head">
-      <h1>Readiness assessment</h1>
+    <div class="view-head">
+      <span class="eyebrow">Readiness</span>
+      <h1>How much of the deal is actually written down?</h1>
       <p class="lede">
-        Score this proposal against every requirement in the guide. Commitments are
-        assessed against the four pillars of the basic rule; actions are done or not.
-        Everything is stored in this browser only — nothing is uploaded.
+        Commitments are scored against the four pillars of the basic rule; actions are
+        done or not. Everything stays on this device — nothing is uploaded.
       </p>
     </div>
 
     <div class="gauge-row">
-      <div class="gauge">
-        <div class="gauge-value" id="gauge-value">0<span>%</span></div>
+      <div class="block gauge">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
+            <circle class="ring-fg" id="gauge-ring" cx="100" cy="100" r="90" transform="rotate(-90 100 100)"></circle>
+          </svg>
+          <div>
+            <div class="gauge-value" id="gauge-value">0<span>%</span></div>
+            <div class="gauge-secured">secured</div>
+          </div>
+        </div>
         <div class="gauge-band" id="gauge-band">Not started</div>
-        <div class="gauge-meaning" id="gauge-meaning"></div>
+        <p class="gauge-meaning" id="gauge-meaning"></p>
         <div class="gauge-points" id="gauge-points"></div>
       </div>
       <div class="gauge-side">
@@ -142,9 +192,12 @@
     </div>
 
     <div class="readiness-actions">
-      <button class="btn btn-primary" id="export-md">Export council report (Markdown)</button>
-      <button class="btn" id="export-json">Export assessment (JSON)</button>
-      <button class="btn" id="import-json">Import assessment</button>
+      <button class="cta cta-primary" id="export-md">
+        <span>Export council report</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12"></path><path d="M6 10l6 6 6-6"></path><path d="M4 20h16"></path></svg>
+      </button>
+      <button class="cta cta-quiet" id="export-json"><span>Export assessment (JSON)</span></button>
+      <button class="cta cta-quiet" id="import-json"><span>Import assessment</span></button>
       <button class="btn btn-danger" id="reset-all">Reset</button>
       <input type="file" id="import-file" accept="application/json" hidden>
     </div>
@@ -159,11 +212,12 @@
 
   <!-- ── Evidence ──────────────────────────────────────────────────── -->
   <section class="view" id="view-evidence" hidden>
-    <div class="readiness-head">
-      <h1>Evidence</h1>
+    <div class="view-head">
+      <span class="eyebrow">Evidence</span>
+      <h1>Every claim, and how to check it.</h1>
       <p class="lede">
-        Every factual claim the guide relies on, what it is useful for, and how to check
-        it against your own jurisdiction before you repeat it at a hearing.
+        What each figure is useful for, and how to verify it in your own jurisdiction
+        before you repeat it at a hearing.
       </p>
       <div class="notice notice-warn" id="evidence-warning"></div>
       <div class="notice" id="evidence-provenance"></div>
@@ -173,13 +227,12 @@
 
   <!-- ── API ───────────────────────────────────────────────────────── -->
   <section class="view" id="view-api" hidden>
-    <div class="readiness-head">
-      <h1>Community Goal API</h1>
+    <div class="view-head">
+      <span class="eyebrow">API</span>
+      <h1>The whole guide, as JSON.</h1>
       <p class="lede">
-        The whole guide is published as a read-only JSON API so other communities can
-        build on it — a council dashboard, a comparison across proposals, a checklist in
-        another language. Every endpoint is a static file on GitHub Pages: no key, no
-        rate limit, no server to go down.
+        Read-only, every endpoint a static file. No key, no rate limit, no server to go
+        down. Build a council dashboard, compare proposals, translate it.
       </p>
     </div>
 
@@ -199,20 +252,19 @@
       </div>
     </div>
   </section>
+
   <!-- ── Contribute ────────────────────────────────────────────────── -->
   <section class="view" id="view-contribute" hidden>
-    <div class="readiness-head">
-      <h1>Contribute</h1>
-      <p class="lede">
-        This guide is only as good as the people who correct it. It is open to
-        residents, town staff, NGOs, agencies, planners, and practitioners — and the
-        contributions that matter most need no code at all.
-      </p>
+    <div class="view-head">
+      <span class="eyebrow">Contribute</span>
     </div>
 
     <div class="coverage-card" id="coverage-card"></div>
 
-    <h2 class="section-break">Four ways in</h2>
+    <div class="section-break">
+      <span class="eyebrow">No code required</span>
+      <h2>Four ways in.</h2>
+    </div>
     <div class="contribute-grid" id="contribute-grid"></div>
 
     <h2 class="section-break">Local overlays <span class="count-badge" id="overlay-count"></span></h2>
@@ -221,6 +273,12 @@
 
     <h2 class="section-break">Ground rules</h2>
     <div class="rules-grid" id="rules-grid"></div>
+
+    <div class="block disclosure">
+      <span class="eyebrow">The one rule</span>
+      <p class="block-statement"><strong>Declare an interest.</strong> Disclosed interest disqualifies nobody. Undisclosed interest gets reverted.</p>
+      <p class="soft">Developers, operators, utilities, and campaigners are all welcome here on the same terms.</p>
+    </div>
 
     <div class="licence-note" id="licence-note"></div>
   </section>

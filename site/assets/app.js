@@ -20,6 +20,27 @@
 
   const WEIGHT_LABEL = { 3: 'critical', 2: 'important', 1: 'supporting' };
 
+  const ICON = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>',
+    checkThin: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>',
+    circle: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle></svg>',
+    arrow: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>',
+    arrowSmall: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>',
+    doc: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h12l4 4v12H4z"></path><path d="M8 12h8"></path><path d="M8 16h8"></path></svg>',
+    pin: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>',
+    plus: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>',
+    alert: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg>',
+  };
+
+  // Split "A town's first data center: what to require before saying yes"
+  // into the two display lines the hero sets.
+  function splitTitle(title) {
+    const i = title.indexOf(':');
+    if (i === -1) return [title, ''];
+    const tail = title.slice(i + 1).trim();
+    return [title.slice(0, i) + '.', tail.charAt(0).toUpperCase() + tail.slice(1) + '.'];
+  }
+
   let guide = null;          // the full API document
   let reqIndex = new Map();  // requirement id -> requirement
   let state = load();        // id -> { pillars: {}, done: bool, notes: string }
@@ -131,56 +152,67 @@
   function renderGuide() {
     const m = guide.meta;
     document.title = m.title;
-    $('#doc-title').textContent = m.title;
+    const [titleA, titleB] = splitTitle(m.title);
+    $('#doc-title').textContent = titleA;
+    $('#doc-sub').textContent = titleB;
     $('#doc-subtitle').textContent = m.subtitle;
     $('#credit').innerHTML = m.source
       ? `${esc(m.source.credit)} <a href="${esc(m.source.url)}" target="_blank"
-           rel="noopener noreferrer">Original post →</a>`
+           rel="noopener noreferrer">Original ${ICON.arrowSmall}</a>`
       : '';
+
+    const cov = guide.citation_coverage;
+    $('#cta-cite').href = formUrl('source', { title: '[source] ' });
+    $('#cta-cite-label').textContent =
+      `${cov.uncited} claims still need a source — cite one`;
     $('#goal-statement').textContent = guide.goal.statement;
     $('#goal-rule').textContent = guide.goal.rule;
     $('#disclaimer').textContent = m.disclaimer;
     $('#source-note').textContent = m.source_note;
     $('#closing-rule').textContent = guide.goal.rule;
 
-    const commitments = guide.requirements.filter((r) => r.type === 'commitment').length;
     $('#hero-stats').innerHTML = [
-      [guide.sections.length, 'sections'],
-      [guide.requirements.length, 'requirements'],
-      [commitments, 'enforceable commitments'],
-      [guide.evidence.length, 'checkable claims'],
-    ].map(([n, label]) =>
-      `<div class="stat"><strong>${n}</strong><span>${label}</span></div>`).join('');
+      [guide.requirements.length, 'requirements', ''],
+      [guide.sections.length, 'sections', ''],
+      [cov.uncited, 'claims to source', 'stat-warn'],
+    ].map(([n, label, cls]) =>
+      `<div class="stat ${cls}"><strong>${n}</strong><span>${label}</span></div>`).join('');
 
     $('#framing').innerHTML = `
-      <h2>${esc(guide.framing.heading)}</h2>
+      <span class="eyebrow">${esc(guide.framing.heading)}</span>
       <div class="framing-facts">
         ${guide.framing.facts.map((f) => `
           <div class="fact">
-            <strong>${esc(f.claim)}</strong>
+            ${f.figure ? `<span class="fact-figure">${esc(f.figure)}</span>` : ''}
+            <p>${f.figure_label ? `${esc(f.figure_label)}. ` : ''}<strong>${esc(f.claim)}</strong></p>
             <p>${esc(f.detail)}</p>
           </div>`).join('')}
       </div>
       <p class="framing-conclusion">${esc(guide.framing.conclusion)}</p>`;
 
-    $('#rule').innerHTML = `
-      <h2>The basic rule</h2>
-      <p class="rule-statement">${esc(guide.basic_rule.statement)}</p>
+    $('#basic-rule').innerHTML = `
+      <span class="eyebrow">The basic rule</span>
+      <h2>Every important promise needs four things.</h2>
+      <p class="rule-statement">${esc(guide.basic_rule.statement)} Every one of the
+        ${guide.requirements.filter((r) => r.type === 'commitment').length} commitments is
+        scored against them — that is the whole readiness model.</p>
       <div class="pillars">
         ${guide.basic_rule.pillars.map((p, i) => `
           <div class="pillar" id="pillar-${p.id}">
-            <div class="pillar-index">Pillar ${i + 1}</div>
-            <h3>${esc(p.name)}</h3>
-            <p>${esc(p.question)}</p>
-            <p class="failure">${esc(p.failure_mode)}</p>
+            <span class="pillar-index">0${i + 1}</span>
+            <div>
+              <h3>${esc(p.name)}</h3>
+              <p>${esc(p.question)}</p>
+              <p class="failure">${esc(p.failure_mode)}</p>
+            </div>
           </div>`).join('')}
       </div>`;
-    $('#rule').id = 'basic-rule';
 
     $('#instruments').innerHTML = `
-      <h2>Six documents, six jobs</h2>
+      <span class="eyebrow">Six documents, six jobs</span>
+      <h2>Put each protection where it can actually live.</h2>
       <p class="muted">A protection written into the wrong instrument is not a protection.
-      Each requirement below is tagged with the documents that can carry it.</p>
+      Each requirement below names the documents that can carry it.</p>
       <div class="table-wrap">
         <table class="instrument-table">
           <thead><tr><th>Document</th><th>Purpose</th></tr></thead>
@@ -209,16 +241,28 @@
         <span class="toc-done" data-done="${s.id}"></span>
       </a>`).join('');
 
+    $('#section-strip').innerHTML = guide.sections.map((s) => `
+      <a class="strip-link" href="#${s.slug}" data-section="${s.id}">
+        <span class="n">${s.number}</span><span>${esc(shortTitle(s.title))}</span>
+      </a>`).join('');
+
     $('#sections').innerHTML = guide.sections.map(renderSection).join('');
     wireGuideEvents();
     observeSections();
     renderOverlayPicker();
   }
 
+  // The strip has room for a few words per section, not a sentence.
+  function shortTitle(title) {
+    const cut = title.split(/[,:—]/)[0].trim();
+    const words = cut.split(' ');
+    return words.length > 5 ? words.slice(0, 5).join(' ') + '…' : cut;
+  }
+
   function renderSection(section) {
     return `
       <section class="section" id="${section.slug}" data-section="${section.id}">
-        <div class="section-num">${section.number}</div>
+        <div class="section-num">${String(section.number).padStart(2, '0')}</div>
         <h2>${esc(section.title)}</h2>
         <p class="section-summary">${esc(section.summary)}</p>
         <p class="section-goal"><strong>Goal:</strong> ${esc(section.goal)}</p>
@@ -235,33 +279,38 @@
       .map((id) => guide.instruments.find((i) => i.id === id))
       .filter(Boolean);
 
+    const weightClass = req.weight === 3 ? 'badge-critical' : req.weight === 2 ? 'badge-important' : '';
     return `
       <article class="req" id="${req.id}" data-req="${req.id}"
                data-weight="${req.weight}"
                data-instruments="${req.instruments.join(' ')}"
                data-state="${reqState(req)}">
         <div class="req-head">
-          <div class="req-title">
-            <h3><span class="req-id">${req.id}</span>${esc(req.title)}</h3>
-            <p class="req-detail">${esc(req.detail)}</p>
-            <div class="req-tags">
-              <span class="tag tag-weight-${req.weight}">${WEIGHT_LABEL[req.weight]}</span>
-              <span class="tag">${req.type}</span>
-              ${req.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}
-            </div>
+          <div class="req-chips">
+            <span class="req-id">${req.id}</span>
+            <span class="badge ${weightClass}">${WEIGHT_LABEL[req.weight]}</span>
+            <span class="badge">${req.type}</span>
           </div>
+          <h3 class="req-title">${esc(req.title)}</h3>
+          <p class="req-detail">${esc(req.detail)}</p>
+          <div class="req-tags">${req.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>
         </div>
-        ${req.pitfall ? `<div class="pitfall"><strong>What went wrong elsewhere</strong>${esc(req.pitfall)}</div>` : ''}
+        ${req.pitfall ? `<div class="block pitfall">
+          <span class="eyebrow eyebrow-warn">What went wrong elsewhere</span>
+          <p class="block-statement">${esc(req.pitfall)}</p>
+        </div>` : ''}
         ${req.note ? `<div class="note">${esc(req.note)}</div>` : ''}
         <div class="local-note" data-local="${req.id}" hidden></div>
         <div class="req-assess">
-          <div class="assess-label">${req.type === 'commitment'
-            ? 'Assess against the basic rule' : 'Mark when done'}</div>
-          <div class="pillar-row">${renderControls(req)}</div>
-          <textarea class="req-notes" data-notes="${req.id}" rows="1"
-            placeholder="Where does this live — ordinance section, agreement clause, who owns it?"></textarea>
-          ${instruments.length ? `<p class="instrument-hint">Carried by:
-            ${instruments.map((i) => esc(i.name)).join(' · ')}</p>` : ''}
+          <div class="assess-head">
+            <span class="eyebrow">${req.type === 'commitment'
+              ? 'Assess against the basic rule' : 'Mark when done'}</span>
+            <span class="assess-score" data-score="${req.id}"></span>
+          </div>
+          <div class="pillar-rows">${renderControls(req)}</div>
+          <textarea class="req-notes" data-notes="${req.id}" placeholder="Where does this live — ordinance section, agreement clause, who owns it?" rows="2"></textarea>
+          ${instruments.length ? `<p class="instrument-hint">Carried by
+            <strong>${instruments.map((i) => esc(i.name)).join(' · ')}</strong></p>` : ''}
           <p class="suggest"><a href="${suggestUrl(req)}" target="_blank"
             rel="noopener noreferrer">Suggest a change to ${req.id} →</a></p>
         </div>
@@ -270,12 +319,18 @@
 
   function renderControls(req) {
     if (req.type === 'action') {
-      return `<button class="pillar-toggle" data-done="${req.id}"
-        aria-pressed="false">Done</button>`;
+      return `<button class="pillar-toggle" data-done="${req.id}" aria-pressed="false">
+        <span class="mark">${ICON.check}</span>
+        <span class="pt-text"><span class="pt-name">Done</span>
+          <span class="pt-q">This one is an action, not a promise — it is either done or it is not.</span></span>
+      </button>`;
     }
     return guide.basic_rule.pillars.map((p) => `
-      <button class="pillar-toggle" data-pillar="${p.id}" data-req="${req.id}"
-        aria-pressed="false" title="${esc(p.question)}">${esc(p.name)}</button>`).join('');
+      <button class="pillar-toggle" data-pillar="${p.id}" data-req="${req.id}" aria-pressed="false">
+        <span class="mark">${ICON.check}</span>
+        <span class="pt-text"><span class="pt-name">${esc(p.name)}</span>
+          <span class="pt-q">${esc(p.question)}</span></span>
+      </button>`).join('');
   }
 
   function wireGuideEvents() {
@@ -492,6 +547,14 @@
       });
       const notes = $('[data-notes]', el);
       if (notes && document.activeElement !== notes) notes.value = (e && e.notes) || '';
+      const chip = $('[data-score]', el);
+      if (chip) {
+        const st = reqState(req);
+        chip.dataset.level = st;
+        chip.textContent = req.type === 'commitment'
+          ? `${pillarIds().filter((p) => e && e.pillars[p]).length} of ${pillarIds().length}`
+          : (st === 'complete' ? 'Done' : 'Open');
+      }
     });
 
     guide.sections.forEach((section) => {
@@ -520,18 +583,20 @@
 
   function renderReadiness(total, b) {
     $('#gauge-value').innerHTML = `${total.pct}<span>%</span>`;
+    const ring = $('#gauge-ring');
+    if (ring) ring.style.strokeDashoffset = String(565.5 * (1 - total.pct / 100));
     $('#gauge-band').textContent = total.pct === 0 ? 'Not started' : b.label;
     $('#gauge-meaning').textContent = total.pct === 0
       ? 'Work through the guide and record what is actually written down.'
       : b.meaning;
     $('#gauge-points').textContent =
-      `${total.earned} of ${total.max} weighted points · ${guide.scoring.method}`;
+      `${total.earned} of ${total.max} weighted points`;
 
     const commitments = guide.requirements.filter((r) => r.type === 'commitment');
     $('#pillar-summary').innerHTML = guide.basic_rule.pillars.map((p) => {
       const hit = commitments.filter((r) => state[r.id] && state[r.id].pillars[p.id]).length;
       return `<div class="pillar-stat">
-        <strong>${hit}<span style="font-size:.9rem;color:var(--ink-faint)">/${commitments.length}</span></strong>
+        <strong>${hit}<small>/${commitments.length}</small></strong>
         <span>${esc(p.name)}</span>
       </div>`;
     }).join('');
@@ -540,8 +605,8 @@
       const reqs = guide.requirements.filter((r) => q.sections.includes(r.section_id));
       const s = score(reqs);
       const ok = s.pct >= 80;
-      return `<div class="answer">
-        <span class="answer-state" data-ok="${ok}">${ok ? '●' : '○'}</span>
+      return `<div class="answer" data-ok="${ok}">
+        ${ok ? ICON.checkThin : ICON.circle}
         <span>${esc(q.question)}</span>
         <span class="answer-pct">${s.pct}%</span>
       </div>`;
@@ -563,12 +628,12 @@
     $('#gap-list').innerHTML = gaps.length
       ? gaps.map((r) => `
         <a class="gap" href="#${r.id}" data-goto="guide">
-          <span class="gap-weight">${WEIGHT_LABEL[r.weight]}</span>
+          <span class="gap-id">${r.id}</span>
           <span class="gap-body">
             <strong>${esc(r.title)}</strong>
-            <span>${r.id} · section ${r.section_number}</span>
+            <span class="gap-missing">missing: ${esc(missingPillars(r).join(', '))}</span>
           </span>
-          <span class="gap-missing">missing: ${esc(missingPillars(r).join(', '))}</span>
+          <span class="gap-weight">${WEIGHT_LABEL[r.weight]}</span>
         </a>`).join('')
       : `<p class="muted">No gaps recorded. Re-read the six questions above and confirm
          each answer points at a document, not an intention.</p>`;
@@ -626,6 +691,7 @@
   const WAYS_IN = [
     {
       form: 'source',
+      icon: 'doc',
       title: 'Cite a claim',
       who: 'anyone with a library card',
       body: 'Eighteen claims carry no primary source. Trace one to a public document — '
@@ -635,6 +701,7 @@
     },
     {
       form: 'jurisdiction',
+      icon: 'pin',
       title: 'Add your jurisdiction',
       who: 'agencies, counties, law school clinics, NGOs',
       body: 'The requirements are shared; the statutes are not. An overlay attaches your '
@@ -644,6 +711,7 @@
     },
     {
       form: 'requirement',
+      icon: 'plus',
       title: 'Propose a requirement',
       who: 'planners, counsel, engineers, residents who lived it',
       body: 'Something the guide misses, or a protection that failed in practice. Bring '
@@ -653,6 +721,7 @@
     },
     {
       form: 'correction',
+      icon: 'alert',
       title: 'Correct something',
       who: 'anyone who spots it',
       body: 'A figure that is wrong, a legal statement that does not hold in your state, '
@@ -668,11 +737,6 @@
     ['Nothing here is legal advice, and nothing may read like it',
      'The guide describes what to require and why. It does not tell a town what the law '
      + 'is where they are — that is what jurisdiction overlays and local counsel are for.'],
-    ['Declare an interest',
-     'If you work for, advise, or are funded by a data center developer, operator, '
-     + 'utility, or an organisation campaigning on either side, say so in the pull '
-     + 'request. Disclosed interest is welcome. Undisclosed interest is what gets a '
-     + 'contribution reverted.'],
     ['Requirements stay portable',
      'Anything true only in one state belongs in an overlay, not in the shared '
      + 'requirement. Ids are permanent, because other people cite them.'],
@@ -683,30 +747,28 @@
     const project = guide.meta.project;
 
     $('#coverage-card').innerHTML = `
-      <div class="coverage-figure">
-        <strong>${cov.uncited}</strong>
-        <span>claims still need a primary source</span>
-      </div>
-      <div class="coverage-body">
-        <p>${esc(cov.note)}</p>
-        <p class="muted">${cov.cited} of ${cov.claims} cited (${cov.percent}%). Coverage is
+      <span class="coverage-figure">${cov.uncited}</span>
+      <h2>claims still need a primary source.</h2>
+      <p>${esc(cov.note)}</p>
+      <p class="muted">${cov.cited} of ${cov.claims} cited (${cov.percent}%). Coverage is
         published at <code>api/v1/coverage.json</code> so nobody has to take the guide's
-        word for how well sourced it is.</p>
-        <p><a href="${esc(project.roadmap)}" target="_blank" rel="noopener noreferrer">
-          All ${cov.uncited} are listed in the roadmap</a>, each with a note on where its
-          primary document probably lives. One claim is a complete contribution.</p>
-        <a class="btn btn-primary" href="${formUrl('source', { title: '[source] ' })}"
-           target="_blank" rel="noopener noreferrer">Cite a claim</a>
-      </div>`;
+        word for how well sourced it is.
+        <a href="${esc(project.roadmap)}" target="_blank" rel="noopener noreferrer">All
+        ${cov.uncited} are listed in the roadmap</a>, each with a note on where its primary
+        document probably lives.</p>
+      <a class="cta cta-warn-solid" href="${formUrl('source', { title: '[source] ' })}"
+         target="_blank" rel="noopener noreferrer"><span>Cite a claim</span>${ICON.arrow}</a>`;
 
     $('#contribute-grid').innerHTML = WAYS_IN.map((w) => `
-      <article class="contribute-card">
-        <h3>${esc(w.title)}</h3>
-        <p class="contribute-who">${esc(w.who)}</p>
-        <p>${esc(w.body)}</p>
-        <a class="btn" href="${formUrl(w.form, {})}" target="_blank"
-           rel="noopener noreferrer">${esc(w.cta)} →</a>
-      </article>`).join('');
+      <a class="contribute-card" href="${formUrl(w.form, {})}" target="_blank"
+         rel="noopener noreferrer">
+        ${ICON[w.icon]}
+        <div>
+          <h3>${esc(w.title)}</h3>
+          <p class="contribute-who">${esc(w.who)}</p>
+          <p>${esc(w.body)}</p>
+        </div>
+      </a>`).join('');
 
     $('#overlay-count').textContent = guide.jurisdictions.length;
     $('#overlay-how').textContent =
@@ -1003,10 +1065,17 @@
 
   function observeSections() {
     const links = new Map($$('#toc a').map((a) => [a.dataset.section, a]));
+    const strip = new Map($$('#section-strip a').map((a) => [a.dataset.section, a]));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
-        const link = links.get(e.target.dataset.section);
+        const id = e.target.dataset.section;
+        const link = links.get(id);
         if (link) link.classList.toggle('active', e.isIntersecting);
+        const chip = strip.get(id);
+        if (chip) {
+          chip.classList.toggle('active', e.isIntersecting);
+          if (e.isIntersecting) chip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+        }
       });
     }, { rootMargin: '-20% 0px -70% 0px' });
     $$('.section').forEach((s) => io.observe(s));

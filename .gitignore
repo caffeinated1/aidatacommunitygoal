@@ -1,0 +1,6 @@
+# Build output, published by .github/workflows/pages.yml
+dist/
+
+__pycache__/
+*.py[cod]
+.DS_Store

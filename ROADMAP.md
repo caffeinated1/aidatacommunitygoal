@@ -8,7 +8,7 @@ Nothing on this list requires writing code.
 
 ---
 
-## 1. Source the 18 claims
+## 1. Source the 19 claims
 
 Every figure in the guide came from a document that names no citations. Each one
 below is published with a way to verify it locally, and an empty `sources` array
@@ -39,6 +39,7 @@ waiting for someone to close the gap. Coverage is at
 | `ev-sole-remedy` | A sole-remedy clause capped a $20M protection on a ~$10B project | Same set — the specific agreement and its remedies clause |
 | `ev-equipment-life` | Equipment obsolete in 4–6 years; shell lasts 30 | Operator depreciation schedules in public filings; industry refresh-cycle studies |
 | `ev-construction-jobs` | 1,000+ construction workers for 2–3 years | Project labor agreements, permit applications, or economic impact studies filed with an application |
+| `ev-construction-phase-impacts` | The construction phase generates the crashes, the rent spikes, and the hearing rooms; the workforce plan is missing from nearly every deal | **Offered already** — the contributor who proposed Section 11 holds a sourced public-case reference (Richland Parish; Ellendale). Ask for it and attach it |
 
 If a source turns out **not** to support the claim as written, that is the most
 valuable outcome on this page. File a
@@ -83,9 +84,12 @@ placeholders, and `status: draft` is an honest, useful state to publish in.
 
 Named here so contributors can see the edges of what exists:
 
-- **No section on construction-phase impacts** as a standalone topic — traffic,
-  dust, hours, haul routes, and the complaints that arrive before anything is
-  operating. Currently scattered across sections 2 and 8.
+- **Section 11 (construction workforce) is new and thinly sourced.** It was
+  proposed in the public discussion of the source post and is the first
+  community-contributed section. It needs its offered public-case reference
+  attached, a jurisdiction overlay that names a real road-remediation bond or
+  EMS cost-recovery clause, and a reviewer who has run a large construction
+  workforce plan.
 - **Section 5 gives drafting positions, not validated thresholds.** They are
   labelled as such deliberately. An acoustical engineer willing to review them
   and say which hold up would improve the most-used section in the guide.

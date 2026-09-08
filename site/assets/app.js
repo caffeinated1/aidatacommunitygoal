@@ -169,6 +169,9 @@
     $('#goal-rule').textContent = guide.goal.rule;
     $('#disclaimer').textContent = m.disclaimer;
     $('#source-note').textContent = m.source_note;
+    $('#version-note').textContent = m.latest_change
+      ? `v${m.version} · ${m.latest_change.summary}`
+      : `v${m.version}`;
     $('#closing-rule').textContent = guide.goal.rule;
 
     $('#hero-stats').innerHTML = [
@@ -829,6 +832,7 @@
     ['jurisdictions.json', 'Local overlays and how to add one'],
     ['jurisdictions/template.json', 'One overlay, keyed by requirement id'],
     ['coverage.json', 'How many claims are traced to a source'],
+    ['changelog.json', 'What changed in each version, newest first'],
     ['guide.json', 'The entire guide in one document'],
     ['openapi.json', 'OpenAPI 3.1 description'],
   ];
@@ -843,6 +847,25 @@
       `  | jq '.requirements[] | select(.weight == 3) | {id, title, instruments}'\n\n` +
       `# a blank assessment your council can fill in and publish\n` +
       `curl -s ${origin}${API_BASE}/checklist.json -o assessment.json`;
+
+    const log = guide.changelog || [];
+    $('#changelog').innerHTML = `
+      <span class="eyebrow">Living, not a snapshot</span>
+      <h2>What changed</h2>
+      <p class="muted">Poll <code>index.json</code> for <code>meta.version</code>; when it
+        moves, read <code>changelog.json</code>. Requirement ids are permanent.</p>
+      ${log.map((e) => `
+        <article class="log-entry">
+          <div class="log-head">
+            <span class="log-version">v${esc(e.version)}</span>
+            <span class="log-date">${esc(e.date)}</span>
+          </div>
+          <p class="log-summary">${esc(e.summary)}</p>
+          <ul class="log-changes">${e.changes.map((c) => `
+            <li><span class="log-kind" data-kind="${esc(c.kind)}">${esc(c.kind)}</span>
+              <code>${esc(c.ref)}</code> ${esc(c.text)}</li>`).join('')}
+          </ul>
+        </article>`).join('')}`;
 
     $('#api-list').innerHTML = ENDPOINTS.map(([path, desc]) => `
       <button class="api-endpoint" data-path="${path}" aria-pressed="false">

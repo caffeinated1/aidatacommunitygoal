@@ -7,17 +7,18 @@ message: >-
 type: dataset
 abstract: >-
   A structured, open requirements guide for local governments facing a first data
-  center proposal: ten sections and seventy-one requirements covering independent
-  review, site suitability, instrument selection, water, noise, on-site
-  generation, ratepayer and budget exposure, public return, financial security,
-  and phased approval with funded closure. Published as an interactive site and a
+  center proposal: eleven sections and seventy-eight requirements covering
+  independent review, site suitability, instrument selection, water, noise,
+  on-site generation, ratepayer and budget exposure, public return, financial
+  security, phased approval with funded closure, and the construction-phase
+  workforce plan. Published as an interactive site and a
   static JSON API, with community-contributed jurisdiction overlays.
 authors:
   - name: "Community Goal contributors"
 repository-code: "https://github.com/caffeinated1/aidatacommunitygoal"
 url: "https://caffeinated1.github.io/aidatacommunitygoal/"
 license: CC-BY-4.0
-version: "1.0.0"
+version: "1.1.0"
 date-released: "2026-09-08"
 references:
   - type: generic

@@ -1,7 +1,7 @@
 {
   "meta": {
     "id": "town-first-data-center",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "title": "A town's first data center: what to require before saying yes",
     "subtitle": "A requirements guide for local officials, planning boards, and residents facing a first data center proposal.",
     "audience": [
@@ -172,7 +172,8 @@
       "question": "What will be built?",
       "sections": [
         "s2",
-        "s10"
+        "s10",
+        "s11"
       ]
     },
     {
@@ -181,7 +182,8 @@
       "sections": [
         "s4",
         "s6",
-        "s7"
+        "s7",
+        "s11"
       ]
     },
     {

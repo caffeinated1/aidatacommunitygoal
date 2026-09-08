@@ -216,5 +216,17 @@
     "use": "Directs labor standards to the phase that actually carries employment.",
     "verify": "Ask for the applicant's peak construction headcount projection and the permanent operating headcount, stated separately and in writing.",
     "sources": []
+  },
+  {
+    "id": "ev-construction-phase-impacts",
+    "headline": "The construction phase generates the crashes, the rent spikes, and the hearing rooms",
+    "statement": "A construction-phase workforce plan is the clause missing from nearly every signed data center deal and every benchmark, and the construction phase is what generates the crashes, the rent spikes, and the packed hearing rooms.",
+    "topic": "construction",
+    "sections": [
+      "s11"
+    ],
+    "use": "The case for treating the construction phase as its own section with its own scoring, rather than a line inside public return.",
+    "verify": "The contributor who proposed this section keeps a sourced public-case reference on it (Richland Parish; Ellendale). Ask for it and attach it here as the first source; then check your own county's crash and dispatch records for any large construction project in the last decade.",
+    "sources": []
   }
 ]

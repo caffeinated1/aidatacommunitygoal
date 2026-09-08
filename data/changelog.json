@@ -1,0 +1,41 @@
+[
+  {
+    "version": "1.1.0",
+    "date": "2026-09-08",
+    "summary": "Section 11, the construction-phase workforce plan, from the first community contribution.",
+    "changes": [
+      {
+        "kind": "added",
+        "ref": "s11",
+        "text": "Section 11 — plan the construction phase before the first truck arrives. Seven requirements: workforce curve disclosure, staging and laydown siting, delivery and shift timing, funded transit, road baseline plus remediation bond before mobilization, a named accountable workforce manager under a code of conduct, and EMS funding tied to measured call load. Proposed in the public discussion of the source post."
+      },
+      {
+        "kind": "added",
+        "ref": "ev-construction-phase-impacts",
+        "text": "Evidence item for the section's central claim, uncited until the contributor's public-case reference is attached."
+      },
+      {
+        "kind": "changed",
+        "ref": "questions",
+        "text": "\"What will be built?\" and \"What will it consume?\" now count Section 11 in their readiness."
+      },
+      {
+        "kind": "added",
+        "ref": "api/v1/changelog.json",
+        "text": "This endpoint. Poll index.json for meta.version and meta.built_at; read here for what changed."
+      }
+    ]
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-09-08",
+    "summary": "First release: ten sections and 71 requirements from the source document, the readiness model, jurisdiction overlays, and the API.",
+    "changes": [
+      {
+        "kind": "added",
+        "ref": "s1",
+        "text": "Sections 1 through 10, 71 requirements, 18 evidence items, 6 instruments, the four-pillar scoring model, one template jurisdiction overlay."
+      }
+    ]
+  }
+]

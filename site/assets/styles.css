@@ -672,3 +672,22 @@ pre { background: var(--bg-sunken); border: 1px solid var(--line); border-radius
   .block p, .block .soft, .block .eyebrow { color: #000 !important; }
   .view[hidden] { display: none !important; }
 }
+
+/* ── Changelog ─────────────────────────────────────────────────────── */
+
+.changelog { max-width: var(--measure); margin: 0 0 32px; }
+.log-entry { padding: 16px 0; border-top: 1px solid var(--line); }
+.log-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.log-version { font-family: var(--display); font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em; }
+.log-date { font-size: .78rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.log-summary { margin: 0 0 8px; font-weight: 500; }
+.log-changes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.log-changes li { font-size: .88rem; line-height: 1.5; color: var(--ink-soft); }
+.log-changes code { color: var(--ink); }
+.log-kind {
+  display: inline-block; font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 4px; margin-right: 4px; background: var(--bg-sunken); color: var(--ink-faint);
+}
+.log-kind[data-kind="added"] { background: var(--accent-soft); color: var(--accent-ink); }
+.log-kind[data-kind="changed"] { background: var(--warn-soft); color: var(--warn); }
+.log-kind[data-kind="removed"], .log-kind[data-kind="fixed"] { background: var(--bg-sunken); color: var(--ink-soft); }

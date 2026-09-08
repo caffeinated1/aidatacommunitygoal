@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from datetime import datetime, timezone
@@ -48,6 +49,45 @@ ALLOWED_LEVELS = ("national", "state", "province", "county", "municipality", "te
 ALLOWED_STATUS = ("template", "draft", "reviewed")
 
 
+ALLOWED_CHANGE_KINDS = ("added", "changed", "removed", "fixed")
+
+
+def load_changelog() -> list:
+    return json.loads((DATA / "changelog.json").read_text(encoding="utf-8"))
+
+
+def validate_changelog(guide: dict, changelog: list) -> None:
+    """The changelog is how a consumer learns what moved; keep it honest."""
+    errors: list[str] = []
+    if not changelog:
+        errors.append("changelog.json is empty")
+    else:
+        versions = [c.get("version") for c in changelog]
+        if len(set(versions)) != len(versions):
+            errors.append("changelog has duplicate versions")
+        if versions[0] != guide["meta"]["version"]:
+            errors.append(f"changelog's first entry is {versions[0]!r} but meta.version is "
+                          f"{guide['meta']['version']!r}; bump both together")
+        for entry in changelog:
+            where = f"changelog {entry.get('version', '?')}"
+            for field in ("version", "date", "summary", "changes"):
+                if not entry.get(field):
+                    errors.append(f"{where} is missing {field}")
+            if not re.fullmatch(r"\d+\.\d+\.\d+", str(entry.get("version", ""))):
+                errors.append(f"{where}: version must be semantic (x.y.z)")
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(entry.get("date", ""))):
+                errors.append(f"{where}: date must be YYYY-MM-DD")
+            for i, ch in enumerate(entry.get("changes") or []):
+                if ch.get("kind") not in ALLOWED_CHANGE_KINDS:
+                    errors.append(f"{where} changes[{i}] kind must be one of "
+                                  f"{', '.join(ALLOWED_CHANGE_KINDS)}")
+                for field in ("ref", "text"):
+                    if not str(ch.get(field, "")).strip():
+                        errors.append(f"{where} changes[{i}] is missing {field}")
+    if errors:
+        raise BuildError("changelog validation failed:\n  - " + "\n  - ".join(errors))
+
+
 def validate(guide: dict, sections: list, evidence: list, jurisdictions: list) -> None:
     """Fail the build on a broken reference rather than shipping a dead link.
 
@@ -67,6 +107,12 @@ def validate(guide: dict, sections: list, evidence: list, jurisdictions: list) -
         errors.append("duplicate section ids")
     if not pillar_ids:
         errors.append("basic_rule.pillars is empty")
+    numbers = [sec.get("number") for sec in sections]
+    if numbers != list(range(1, len(sections) + 1)):
+        errors.append(f"sections must be numbered 1..{len(sections)} in order; got {numbers}")
+    for sec in sections:
+        if sec.get("id") != f"s{sec.get('number')}":
+            errors.append(f"section {sec.get('id')!r} should be s{sec.get('number')}")
 
     seen_req: set[str] = set()
     for section in sections:
@@ -288,7 +334,7 @@ def openapi_spec(base_url: str, guide: dict, sections: list, requirements: list)
                 "summary": "One requirement by id (for example s9-r2)",
                 "operationId": "getRequirement",
                 "parameters": [{"name": "requirementId", "in": "path", "required": True,
-                                "schema": {"type": "string", "pattern": "^s([1-9]|10)-r[0-9]+$"}}],
+                                "schema": {"type": "string", "pattern": "^s[1-9][0-9]*-r[0-9]+$"}}],
                 "responses": ok("Requirement")}},
             "/evidence.json": {"get": {"summary": "Every claim in the guide, with how to verify it locally",
                                        "operationId": "listEvidence", "responses": ok("Evidence")}},
@@ -320,6 +366,10 @@ def openapi_spec(base_url: str, guide: dict, sections: list, requirements: list)
             "/coverage.json": {"get": {
                 "summary": "How many claims have been traced to a primary source",
                 "operationId": "getCoverage", "responses": ok("Citation coverage")}},
+            "/changelog.json": {"get": {
+                "summary": "What changed in each version, newest first — poll index.json "
+                           "for meta.version, then read this",
+                "operationId": "getChangelog", "responses": ok("Changelog")}},
             "/guide.json": {"get": {"summary": "The entire guide as one document",
                                     "operationId": "getGuide", "responses": ok("Full guide")}},
         },
@@ -372,6 +422,11 @@ def render_markdown(guide: dict, sections: list, evidence: list) -> str:
             out += ["_No primary source recorded yet. If you can trace this claim to a "
                     "public document, that is the single most useful contribution you can "
                     f"make: {guide['meta']['project']['forms']['source']}_", ""]
+    out += ["## What changed", ""]
+    for entry in load_changelog():
+        out += [f"### {entry['version']} — {entry['date']}", "", entry["summary"], ""]
+        out += [f"- **{c['kind']}** `{c['ref']}` — {c['text']}" for c in entry["changes"]]
+        out += [""]
     out += ["## Contributing", "",
             "This guide is open to anyone — residents, town staff, NGOs, agencies, and "
             "practitioners. See " + guide["meta"]["project"]["contributing"] + ".", ""]
@@ -406,6 +461,8 @@ def citation_coverage(evidence: list) -> dict:
 def build(dist: Path, base_url: str) -> dict:
     guide, sections, evidence, jurisdictions = load()
     validate(guide, sections, evidence, jurisdictions)
+    changelog = load_changelog()
+    validate_changelog(guide, changelog)
 
     requirements = flatten_requirements(sections)
     scoring = scoring_model(guide, requirements)
@@ -427,6 +484,16 @@ def build(dist: Path, base_url: str) -> dict:
     meta["built_at"] = built_at
     meta["api_version"] = API_VERSION
     meta["citation_coverage"] = {k: v for k, v in coverage.items() if k != "uncited_ids"}
+    meta["latest_change"] = {
+        "version": changelog[0]["version"],
+        "date": changelog[0]["date"],
+        "summary": changelog[0]["summary"],
+    }
+    meta["how_to_follow"] = (
+        "Poll index.json; when meta.version or meta.built_at changes, read changelog.json "
+        "for what moved. Requirement ids are permanent. Minor versions add; major versions "
+        "remove or change meaning."
+    )
 
     endpoints = [
         "index.json", "goal.json", "rule.json", "framing.json", "instruments.json",
@@ -434,7 +501,7 @@ def build(dist: Path, base_url: str) -> dict:
         "requirements/{id}.json", "evidence.json", "evidence/{id}.json", "tags.json",
         "questions.json", "checklist.json", "scoring.json", "search.json",
         "jurisdictions.json", "jurisdictions/{id}.json", "coverage.json",
-        "guide.json", "guide.md", "openapi.json",
+        "changelog.json", "guide.json", "guide.md", "openapi.json",
     ]
 
     write_json(api / "index.json", {
@@ -469,6 +536,7 @@ def build(dist: Path, base_url: str) -> dict:
                                    "tags": [{"tag": t, "count": c} for t, c in sorted(tags.items())]})
     write_json(api / "scoring.json", {"meta": meta, "scoring": scoring})
     write_json(api / "coverage.json", {"meta": meta, "citation_coverage": coverage})
+    write_json(api / "changelog.json", {"meta": meta, "count": len(changelog), "changelog": changelog})
     write_json(api / "jurisdictions.json", {
         "meta": meta,
         "count": len(jurisdictions),
@@ -544,6 +612,7 @@ def build(dist: Path, base_url: str) -> dict:
         "scoring": scoring,
         "jurisdictions": jurisdictions,
         "citation_coverage": coverage,
+        "changelog": changelog,
     })
     write_json(api / "openapi.json", openapi_spec(base_url, guide, sections, requirements))
     (api / "guide.md").write_text(render_markdown(guide, sections, evidence), encoding="utf-8")
@@ -574,6 +643,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.check:
             guide, sections, evidence, jurisdictions = load()
             validate(guide, sections, evidence, jurisdictions)
+            validate_changelog(guide, load_changelog())
             coverage = citation_coverage(evidence)
             print("data ok: %d sections, %d requirements, %d evidence items "
                   "(%d cited), %d jurisdiction overlays" % (

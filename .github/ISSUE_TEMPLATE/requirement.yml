@@ -34,6 +34,7 @@ body:
         - "8 — public return"
         - "9 — financial protection"
         - "10 — phasing and closure"
+        - "11 — the construction-phase workforce plan"
         - "none of these — it needs a new section"
     validations:
       required: true

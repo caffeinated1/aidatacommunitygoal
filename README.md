@@ -13,7 +13,7 @@ anyone can build on. Adapted from a document published by Mark Cuban on
 [How to contribute](CONTRIBUTING.md) ·
 [Governance](GOVERNANCE.md)
 
-Ten sections · 71 requirements · 18 checkable claims · CC BY 4.0
+Eleven sections · 78 requirements · 19 checkable claims · CC BY 4.0
 
 The point is to make one community's goal legible to another. A town facing its
 first data center proposal usually has weeks, a volunteer board, and an
@@ -51,8 +51,9 @@ rather than atmospheric.
 | Path | What it is |
 | --- | --- |
 | `data/guide.json` | Goal, framing facts, basic rule, the six instruments, the six pre-vote questions |
-| `data/sections.json` | Ten sections, 71 requirements |
-| `data/evidence.json` | 18 factual claims, what each is good for, and how to check it locally |
+| `data/sections.json` | Eleven sections, 78 requirements — ten from the source, one contributed |
+| `data/evidence.json` | 19 factual claims, what each is good for, and how to check it locally |
+| `data/changelog.json` | What changed in each version, newest first — the API's pulse |
 | `data/jurisdictions/` | Community-contributed local overlays — one JSON file per place |
 | `schema/guide.schema.json` | Shape of the data files |
 | `build.py` | Validates the data and generates `dist/` — the API and the site |
@@ -76,9 +77,9 @@ api/v1/goal.json                      the goal and the six pre-vote questions
 api/v1/rule.json                      the basic rule and its four pillars
 api/v1/framing.json                   the two facts that frame the decision
 api/v1/instruments.json               the six documents and what each can carry
-api/v1/sections.json                  all ten sections with their requirements
+api/v1/sections.json                  all sections with their requirements
 api/v1/sections/{id|slug}.json        one section (s5 or noise-standards)
-api/v1/requirements.json              all 71 requirements, flattened
+api/v1/requirements.json              all 78 requirements, flattened
 api/v1/requirements/{id}.json         one requirement with its evidence inlined
 api/v1/evidence.json                  every claim, with how to verify it
 api/v1/evidence/{id}.json             one claim
@@ -90,6 +91,7 @@ api/v1/search.json                    client-side search index
 api/v1/jurisdictions.json             local overlays and how to add one
 api/v1/jurisdictions/{id}.json        one overlay, keyed by requirement id
 api/v1/coverage.json                  how many claims are traced to a source
+api/v1/changelog.json                 what changed in each version, newest first
 api/v1/guide.json                     the entire guide in one document
 api/v1/guide.md                       the entire guide as Markdown
 api/v1/openapi.json                   OpenAPI 3.1 description of all of the above
@@ -110,6 +112,26 @@ curl -s $BASE/sections/on-site-generation.json | jq '.section.requirements[].tit
 
 # a blank assessment your council can fill in and publish
 curl -s $BASE/checklist.json -o assessment.json
+```
+
+### Following it as it changes
+
+The API is a living document, not a snapshot. Every endpoint carries
+`meta.version` and `meta.built_at`; poll `index.json` for either and, when it
+moves, read `changelog.json` for exactly what changed and which ids it touched.
+`meta.latest_change` in every response gives the one-line summary without a
+second request.
+
+Versions follow [GOVERNANCE.md](GOVERNANCE.md#versioning-and-citation): a minor
+version adds, a major version removes or changes meaning, and requirement ids
+are permanent either way — a dashboard built against `s9-r2` keeps working.
+GitHub Pages serves every file with `Access-Control-Allow-Origin: *`, so a page
+on any domain can fetch it directly.
+
+```bash
+# what moved since you last looked
+curl -s $BASE/index.json | jq '.meta | {version, built_at, latest_change}'
+curl -s $BASE/changelog.json | jq '.changelog[0].changes[] | "\(.kind) \(.ref): \(.text)"'
 ```
 
 ## The site
@@ -165,7 +187,7 @@ disclosure rule in [GOVERNANCE.md](GOVERNANCE.md).
 
 Four ways in, roughly by leverage:
 
-1. **Cite a claim.** 18 of 18 claims carry no primary source. Coverage is
+1. **Cite a claim.** 19 of 19 claims carry no primary source. Coverage is
    published at `api/v1/coverage.json` rather than hidden, so the gap is visible
    and closable. Tracing one claim to a public document is a ten-minute
    contribution that makes the guide materially more usable at a hearing.
@@ -217,7 +239,7 @@ LinkedIn ([original](https://lnkd.in/p/e-Pbqzrm)). Its accompanying post
 describes it as produced with AI assistance from data center contracts, and it
 names no citations — which is why every evidence item here ships with a `verify`
 field instead of a footnote, why coverage is published at `api/v1/coverage.json`
-rather than hidden, and why sourcing the 18 claims is the top contribution ask.
+rather than hidden, and why sourcing the 19 claims is the top contribution ask.
 Treat each one as a claim to confirm locally before relying on it in a hearing.
 
 Section order, substance, and every figure are the source document's. This

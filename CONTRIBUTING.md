@@ -123,7 +123,8 @@ placeholders.
 ## 3. Proposing a requirement
 
 Add an object to the right section's `requirements` array in
-`data/sections.json`:
+`data/sections.json` (a whole new section is the same shape one level up, with
+a `provenance` field saying who proposed it and where):
 
 ```jsonc
 {
@@ -161,6 +162,11 @@ zoning administrator and this is not how it works here."
   an uncited figure.
 - **Not legal advice.** The guide says what to require and why. It does not tell
   a town what the law is where they are.
+- **Every content change gets a changelog entry.** `data/changelog.json` is how
+  a council dashboard built on the API learns what moved. Add a line under the
+  current version for a correction; bump the minor version and start a new
+  entry for a new requirement, section, or overlay. The build refuses a version
+  bump with no entry.
 - **Ids are permanent.** People cite `s9-r2` in staff reports and council packets.
   Renaming one breaks their citation. Add a new id instead; retire an old one by
   marking it, never by reusing the number.

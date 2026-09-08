@@ -44,9 +44,29 @@ class SourceDataTests(unittest.TestCase):
     def test_validation_passes(self) -> None:
         builder.validate(self.guide, self.sections, self.evidence, self.jurisdictions)
 
-    def test_ten_sections_numbered_in_order(self) -> None:
-        self.assertEqual([s["number"] for s in self.sections], list(range(1, 11)))
-        self.assertEqual([s["id"] for s in self.sections], ["s%d" % n for n in range(1, 11)])
+    def test_sections_are_numbered_consecutively(self) -> None:
+        n = len(self.sections)
+        self.assertGreaterEqual(n, 10, "the ten source sections must never be dropped")
+        self.assertEqual([s["number"] for s in self.sections], list(range(1, n + 1)))
+        self.assertEqual([s["id"] for s in self.sections], ["s%d" % i for i in range(1, n + 1)])
+
+    def test_the_changelog_matches_the_version(self) -> None:
+        changelog = builder.load_changelog()
+        builder.validate_changelog(self.guide, changelog)
+        self.assertEqual(changelog[0]["version"], self.guide["meta"]["version"])
+
+    def test_a_version_bump_without_a_changelog_entry_fails(self) -> None:
+        guide = json.loads(json.dumps(self.guide))
+        guide["meta"]["version"] = "99.0.0"
+        with self.assertRaises(builder.BuildError):
+            builder.validate_changelog(guide, builder.load_changelog())
+
+    def test_a_contributed_section_says_where_it_came_from(self) -> None:
+        # Sections beyond the source document's ten are community additions and
+        # carry their provenance, so a reader can tell what the source said from
+        # what was added later.
+        for section in self.sections[10:]:
+            self.assertTrue(section.get("provenance", "").strip(), section["id"])
 
     def test_slugs_are_url_safe_and_unique(self) -> None:
         slugs = [s["slug"] for s in self.sections]
@@ -159,7 +179,7 @@ class BuildTests(unittest.TestCase):
                      "sections.json", "requirements.json", "evidence.json",
                      "instruments.json", "questions.json", "checklist.json",
                      "scoring.json", "tags.json", "search.json", "guide.json",
-                     "openapi.json", "guide.md"):
+                     "changelog.json", "openapi.json", "guide.md"):
             self.assertTrue(os.path.isfile(os.path.join(self.api, name)), name)
 
     def test_every_requirement_and_section_has_its_own_endpoint(self) -> None:
@@ -291,6 +311,14 @@ class BuildTests(unittest.TestCase):
             meta = read(os.path.join(self.api, name))["meta"]
             self.assertIn("source", meta, name)
             self.assertEqual(meta["source"]["url"], "https://lnkd.in/p/e-Pbqzrm")
+
+    def test_index_tells_a_consumer_how_to_follow_changes(self) -> None:
+        meta = read(os.path.join(self.api, "index.json"))["meta"]
+        self.assertIn("latest_change", meta)
+        self.assertEqual(meta["latest_change"]["version"], meta["version"])
+        self.assertIn("changelog.json", meta["how_to_follow"])
+        changelog = read(os.path.join(self.api, "changelog.json"))
+        self.assertEqual(changelog["changelog"][0]["version"], meta["version"])
 
     def test_markdown_flags_uncited_claims_instead_of_hiding_them(self) -> None:
         with open(os.path.join(self.api, "guide.md"), encoding="utf-8") as handle:

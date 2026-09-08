@@ -58,13 +58,17 @@
         "id": "framing-jobs",
         "claim": "The industry produces very few permanent jobs relative to its cost.",
         "detail": "One watchdog analysis of eleven major projects found subsidies averaging about $1.95 million per job.",
-        "evidence": "ev-subsidy-per-job"
+        "evidence": "ev-subsidy-per-job",
+        "figure": "$1.95M",
+        "figure_label": "subsidy per permanent job"
       },
       {
         "id": "framing-siting",
         "claim": "Incentives are rarely what decides siting.",
         "detail": "In a survey of data center owners, only three percent named tax credits and local incentives as the biggest siting factor. Land and power availability drive the decision.",
-        "evidence": "ev-siting-factor"
+        "evidence": "ev-siting-factor",
+        "figure": "3%",
+        "figure_label": "named incentives as the top siting factor"
       }
     ],
     "conclusion": "You are usually not paying for something that would otherwise not happen."
